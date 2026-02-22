@@ -1,14 +1,16 @@
 import pandas as pd
 
 def get_continuous_stats(df):
-    numeric_df = df.select_dtypes(include=['number'])
+    n_df = df.select_dtypes(include=['number'])
     stats_list = []
 
-    for col_name in numeric_df.columns:
-        if(col_name == "day" or col_name == "month" or col_name == "year" or col_name == "team_a_rounds" or col_name == "team_b_rounds"):
+    ignored_columns = ["day", "month", "year", "team_a_rounds", "team_b_rounds", "rownames"]
+
+    for col_name in n_df.columns:
+        if(col_name in ignored_columns):
             continue
 
-        col_data = numeric_df[col_name]
+        col_data = n_df[col_name]
         
         stats = {
             'Atributas': col_name,
@@ -63,3 +65,43 @@ def get_categorical_stats(df):
     results_df.set_index('Atributas', inplace=True)
     
     return results_df
+
+def remove_outliers(df):
+    df_clean = df.copy()
+    n_df = df_clean.select_dtypes(include=['number']).columns
+    ignored_columns = ["day", "month", "year", "team_a_rounds", "team_b_rounds", "rownames"]
+
+    for col_name in n_df:
+        if(col_name in ignored_columns):
+            continue
+            
+        Q1 = df_clean[col_name].quantile(0.25)
+        Q3 = df_clean[col_name].quantile(0.75)
+        IQR = Q3 - Q1
+        
+        lower_bound = Q1 - IQR
+        upper_bound = Q3 + IQR
+        
+        df_clean[col_name] = df_clean[col_name].clip(lower=lower_bound, upper=upper_bound)
+
+    return df_clean
+
+import pandas as pd
+
+def normalize(df):
+    n_df = df.select_dtypes(include=['number']).copy()
+
+    ignored_columns = ["day", "month", "year", "team_a_rounds", "team_b_rounds", "rownames"]
+
+    for col in n_df.columns:
+        if col in ignored_columns:
+            continue
+        
+        col_min = n_df[col].min()
+        col_max = n_df[col].max()
+        
+        n_df[col] = (n_df[col] - col_min) / (col_max - col_min)
+
+    return n_df
+
+import pandas as pd
