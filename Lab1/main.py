@@ -4,7 +4,7 @@ from visualizer import plot_histograms, plot_categorical_bars, plot_boxplots, pl
 import pandas as pd
 
 def main():
-    file_path = './data/csgo.csv'
+    file_path = '../data/csgo.csv'
     print("Starting")
 
     df = load_dataset(file_path)
